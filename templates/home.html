@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <style>
+        /* General Body Styling for the Home Page */
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+
+        /* Slideshow container */
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            height: 450px;
+            margin: 90px auto 20px auto;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .slides {
+            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            animation: slideFadeIn 1s ease-in-out;
+        }
+
+        .slides img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        footer {
+            background-color: transparent;
+            color: #94a3b8;
+            text-align: center;
+            padding: 20px;
+            position: relative;
+            width: 100%;
+        }
+
+        footer a {
+            color: #2dd4bf;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #14b8a6;
+            text-decoration: underline;
+        }
+
+        @keyframes slideFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+
+    <div class="slideshow-container">
+        <div class="slides">
+            <a href="/page1">
+                <img src="{{ url_for('static', filename='slide1.png') }}" alt="Slide 1">
+            </a>
+        </div>
+        <div class="slides">
+            <a href="/page2">
+                <img src="{{ url_for('static', filename='slide2.png') }}" alt="Slide 2">
+            </a>
+        </div>
+        <div class="slides">
+            <a href="/page3">
+                <img src="{{ url_for('static', filename='slide3.png') }}" alt="Slide 3">
+            </a>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2025 Pavan.ai. All rights reserved.</p>
+    </footer>
+
+    <script>
+        let currentSlide = 0;
+        let slideInterval;
+
+        function showSlides(index) {
+            const slides = document.querySelectorAll('.slides');
+            if (index >= slides.length) currentSlide = 0;
+            else if (index < 0) currentSlide = slides.length - 1;
+            else currentSlide = index;
+
+            slides.forEach((slide, i) => {
+                slide.style.display = i === currentSlide ? 'block' : 'none';
+            });
+        }
+
+        function startAutoSlide() {
+            slideInterval = setInterval(() => {
+                showSlides(currentSlide + 1);
+            }, 3000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            showSlides(currentSlide);
+            startAutoSlide();
+        });
+    </script>
+{% endblock %}

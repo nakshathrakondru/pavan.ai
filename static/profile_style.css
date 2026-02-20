@@ -1,0 +1,250 @@
+/* General body styling */
+body {
+    font-family: 'Tahoma', sans-serif;
+    background-color: #000000;
+    margin: 0;
+    padding: 0;
+    color: #f5f5f5;
+}
+
+/* Profile container styling */
+.profile-container {
+    width: 80%;
+    margin: 100px auto;
+    background: linear-gradient(145deg, #000000eb, #161616f0);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    padding: 30px;
+}
+
+/* Header styling */
+.profile-header {
+    /* text-align: center; */
+    margin-bottom: 40px;
+}
+.header{
+    font-style: italic;
+}
+.profile-header h2 {
+    font-size: 2.5em;
+    color: #ffffff;
+    margin: 0;
+    letter-spacing: 1.5px;
+}
+
+.profile-header p {
+    font-size: 1.1em;
+    color: #d1d1d1;
+    margin-top: 10px;
+}
+
+/* Profile details styling */
+.profile-details {
+    /* text-align: center; */
+    margin: 20px 0;
+}
+
+.profile-details p {
+    font-size: 1.2em;
+    color: #f5f5f5;
+    margin: 10px 0;
+}
+
+.profile-details .label {
+    font-weight: 600;
+    color: #c1c1c1;
+}
+
+/* Action buttons */
+.profile-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.profile-actions .btn {
+    padding: 12px 25px;
+    border: none;
+    font-size: 1em;
+    margin: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.profile-actions .notifications-btn {
+    background: linear-gradient(145deg, #4caf50, #43a047);
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.profile-actions .notifications-btn:hover {
+    background: linear-gradient(145deg, #43a047, #388e3c);
+}
+
+.profile-actions .logout-btn {
+    background: linear-gradient(145deg, #f44336, #e53935);
+    color: white;
+    text-decoration: none;
+}
+
+.profile-actions .logout-btn:hover {
+    background: linear-gradient(145deg, #e53935, #c62828);
+}
+
+/* Notifications form */
+#notificationForm {
+    display: none;
+    margin-top: 20px;
+    text-align: center;
+    background: linear-gradient(145deg, #252525, #2f2f2f);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Dropdown styling */
+.notification-dropdown {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    background: linear-gradient(145deg, #393a39, #424242);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    appearance: none;
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.notification-dropdown:focus {
+    outline: none;
+    background-color: #5c5c5c;
+}
+
+.notification-dropdown option {
+    font-size: 16px;
+}
+
+.notification-dropdown option[disabled] {
+    color: #666666;
+}
+
+/* Submit button */
+.submit-notification-btn {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(145deg, #121212, #1a1a1a);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+.submit-notification-btn:hover {
+    background: linear-gradient(145deg, #1a1a1a, #242424);
+}
+
+/* Accessibility and small-screen adjustments */
+@media (max-width: 768px) {
+    .profile-container {
+        width: 90%;
+        padding: 20px;
+    }
+
+    .btn {
+        font-size: 1em;
+        padding: 8px 16px;
+    }
+
+    .notification-dropdown {
+        font-size: 1em;
+    }
+
+    .profile-header h2 {
+        font-size: 2em;
+    }
+
+    .profile-details p {
+        font-size: 1em;
+    }
+
+    .profile-details .label {
+        font-size: 1.1em;
+    }
+
+    .submit-notification-btn {
+        font-size: 1em;
+        padding: 8px 16px;
+    }
+}
+
+/* List styling */
+#cityList {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cityList-item {
+    background: linear-gradient(145deg, #000000eb, #161616f0 );
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    color: #f3f3f3;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+#emptyMessage {
+    font-style: italic;
+    color: gray;
+    text-align: center;
+    padding: 10px;
+}
+
+.cityList-item button {
+    background: linear-gradient(145deg, #e74c3c, #d32f2f);
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cityList-item button:hover {
+    background: linear-gradient(145deg, #d32f2f, #c62828);
+}
+
+#heading-emptymessage {
+    color: white;
+}
+
+/* Delete account button */
+.btn.delete-account-btn {
+    background: linear-gradient(145deg, #f44336, #e53935);
+    color: white;
+    padding: 12px 25px; /* Match the padding of the other buttons */
+    border: none;
+    border-radius: 8px; /* Match the border-radius */
+    cursor: pointer;
+    font-size: 1em; /* Match font size */
+    margin: 5px; /* Match margin */
+    text-transform: uppercase; /* Match text style */
+    font-weight: 500; /* Match font weight */
+    transition: background-color 0.3s ease;
+}
+
+.btn.delete-account-btn:hover {
+    background: linear-gradient(145deg, #e53935, #c62828);
+}
+
+.delete-account-btn:focus {
+    outline: none;
+}

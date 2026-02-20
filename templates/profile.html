@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='profile_style.css') }}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<div class="profile-container">
+    <div class="profile-header">
+        <h2 class="header">User Profile</h2>
+        <p>Welcome to your profile page, <strong id="user-name">Loading...</strong></p>
+    </div>
+
+    <div class="profile-details">
+        <div class="detail-item">
+            <span class="label">Name:</span>
+            <span id="user-name-details">Loading...</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Email:</span>
+            <span id="user-email">Loading...</span>
+        </div>
+        <div class="detail-item">
+            <span class="label">Contact Number:</span>
+            <span id="user-contact">Loading...</span>
+        </div>
+    </div>
+
+    <div class="profile-actions">
+        <button class="btn notifications-btn" id="notifications-btn">Select Preferences</button>
+        <a href="/logout" class="btn logout-btn">Logout</a>
+        <button class="btn delete-account-btn" id="delete-account-btn">Delete Account</button>
+    </div>
+
+    <div id="notificationForm" class="notification-form hidden">
+        <select id="state" name="state" class="notification-dropdown" onchange="loadCities()" aria-label="State selection">
+            <option value="Andhra Pradesh">Andhra Pradesh</option>
+            <option value="Assam">Assam</option>
+            <option value="Bihar">Bihar</option>
+            <option value="Chandigarh">Chandigarh</option>
+            <option value="Chhattisgarh">Chhattisgarh</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Goa">Goa</option>
+            <option value="Gujarat">Gujarat</option>
+            <option value="Haryana">Haryana</option>
+            <option value="Himachal Pradesh">Himachal Pradesh</option>
+            <option value="Jharkhand">Jharkhand</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Madhya Pradesh">Madhya Pradesh</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Manipur">Manipur</option>
+            <option value="Meghalaya">Meghalaya</option>
+            <option value="Mizoram">Mizoram</option>
+            <option value="Nagaland">Nagaland</option>
+            <option value="Odisha">Odisha</option>
+            <option value="Puducherry">Puducherry</option>
+            <option value="Punjab">Punjab</option>
+            <option value="Rajasthan">Rajasthan</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Telangana">Telangana</option>
+            <option value="Tripura">Tripura</option>
+            <option value="Uttar Pradesh">Uttar Pradesh</option>
+            <option value="Uttarakhand">Uttarakhand</option>
+            <option value="West Bengal">West Bengal</option>
+        </select>
+        
+        <select id="city" name="city" class="notification-dropdown" aria-label="City selection">
+            <option>Select a City</option>
+        </select>
+        <button class="submit-notification-btn" id="submit-btn">Submit</button>
+    </div>
+
+    <div id="selectedCities">
+        <h3 id="heading-emptymessage">Receive updates on:</h3>
+        <ul id="cityList" class="custom-list">
+            <li id="emptyMessage">No preferences yet.</li>
+        </ul>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getDatabase, ref, set, push, remove, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyChZnOB48l2koPn5mPSqFqChoBv3ZhwKTw",
+    authDomain: "pavanai-53e34.firebaseapp.com",
+    databaseURL: "https://pavanai-53e34-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "pavanai-53e34",
+    storageBucket: "pavanai-53e34.firebasedstorage.app",
+    messagingSenderId: "169392243813",
+    appId: "1:169392243813:web:6671bb6d6e9b2d150b328c",
+    measurementId: "G-WQ28J3R0VF"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// Handle user authentication state
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log("User is logged in:", user.uid);
+        sessionStorage.setItem('user_uid', user.uid);
+        loadUserPreferences(user.uid);
+        fetchUserData();
+    } else {
+        console.log("User is not logged in");
+        alert("You must be logged in to view preferences.");
+    }
+});
+
+// Fetch user data from the backend
+async function fetchUserData() {
+    const userUid = sessionStorage.getItem('user_uid');
+    console.log("User UID:", userUid);
+    if (!userUid) {
+        console.error('User UID is not available');
+        alert('User UID is not available');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/user/${userUid}`);
+        console.log('API Response:', response);
+        if (!response.ok) throw new Error('Failed to fetch user details');
+
+        const data = await response.json();
+        console.log('User Data:', data);
+
+        if (data.success) {
+            const user = data.user;
+            console.log("Updating DOM with username:", user.username);
+            document.getElementById('user-name').textContent = user.username || 'N/A';
+            document.getElementById('user-name-details').textContent = user.username || 'N/A';
+            document.getElementById('user-email').textContent = user.email || 'N/A';
+            document.getElementById('user-contact').textContent = user.contactNumber || 'N/A';
+        } else {
+            console.error('User data error:', data.message);
+            alert('Error fetching user details');
+        }
+    } catch (error) {
+        console.error('Error fetching user details:', error.message);
+        alert('An error occurred while fetching user details');
+    }
+}
+
+// Load cities based on the selected state
+window.loadCities = function () {
+    const state = document.getElementById('state').value;
+    const citySelect = document.getElementById('city');
+    citySelect.innerHTML = '<option disabled selected value="">Select a City</option>';
+    const cities = {
+  "Andhra Pradesh": ["Akkarampalle", "Amaravati", "Anantapur", "Chinnachowk", "Chittoor", "Tirupati", "Vemuluru", "Vijayawada", "Visakhapatnam"],
+  "Assam": ["Dispur", "Guwahati", "Mushalpur", "North Guwahati", "Palasbari", "Raha", "Sibsagar", "Silchar"],
+  "Bihar": ["Araria", "Arrah", "Asopur", "Aurangabad", "Begusarai", "Bettiah", "Bhagalpur", "Bihar Sharif", "Buxar", "Chapra", "Gaya", "Gosaingoan", "Hajipur", "Katihar", "Kishanganj", "Kusdihra", "Monghyr", "Mothihari", "Motihari", "Muzaffarpur", "Patna", "Rajgir", "Samastipur"],
+  "Chandigarh": ["Chandigarh"],
+  "Chhattisgarh": ["Bhilai", "Bilaspur", "Durg", "Gharghoda", "Kharsia", "Korba", "Raipur"],
+  "Delhi": ["Defence Colony", "Delhi", "New Delhi", "Shahdara"],
+  "Goa": ["Calangute"],
+  "Gujarat": ["Ahmedabad", "Ankleshwar", "Ghandinagar", "Surat", "Vapi"],
+  "Haryana": ["Ambala", "Bahadurgarh", "Bhiwani", "Charkhi Dadri", "Dharuhera", "Faridabad", "Fatehabad", "Gharaunda", "Gurugram", "Hisar", "Jind", "Kaimla", "Kaithal", "Kurukshetra", "Mandikhera", "Murthal", "Panchkula", "Rohtak", "Sirsa", "Yamuna Nagar"],
+  "Jharkhand": ["Dhanbad", "Jorapokhar"],
+  "Karnataka": ["Anekal", "Bagalkot", "Belgaum", "Bengaluru", "Chamrajnagar", "Chikkaballapur", "Chikmagalur", "Davangere", "Dharwad", "Gadag", "Hallimala", "Haveri", "Honnali", "Hoskote", "Hubli", "Kalaburagi", "Karwar", "Koppal", "Madikeri", "Manipala", "Mysore", "Shivamogga", "Srinivaspur", "Tamaka", "Vijayapura", "Yadgir"],
+  "Kerala": ["Kannur", "Kochi", "Thiruvananthapuram", "Trichur"],
+  "Maharashtra": ["Ahmadnagar", "Airoli", "Akola", "Alandi", "Amravati", "Artist Village", "Aurangabad", "Badlapur", "Bhayandar", "Bhiwandi", "Boisar", "Borivli", "Deolali", "Dhulia", "Jalgaon", "Jalna", "Kagal", "Kalyan", "Khadki", "Kolhapur", "Kupti", "Latur", "Lonavla", "Mahad", "Malegaon", "Mumbai", "Nagpur", "Nanded", "Nashik", "Navi Mumbai", "Panvel", "Parbhani", "Pimpri", "Pimpri-Chinchwad", "Powai", "Pune", "Solapur", "Thane", "Ulhasnagar", "Virar"],
+  "Meghalaya": ["Shillong"],
+  "Mizoram": ["Aizwal"],
+  "Nagaland": ["Kohima"],
+  "Odisha": ["Angul", "Bada Barabil", "Balasore", "Banposh", "Barbil", "Bhubaneshwar", "Cuttack", "Jajpur", "Kiri Buru", "Kudaloi", "Raurkela", "Remuna", "Talcher"],
+  "Puducherry": ["Puducherry"],
+  "Punjab": ["Amritsar", "Bathinda", "Doburji", "Fatehgarh Sahib", "Jalandhar", "Ludhiana", "Mullanpur", "Patiala", "Salodi"],
+  "Rajasthan": ["Ajmer", "Alwar", "Banswara", "Baran", "Barmer", "Bharatpur", "Bhilwara", "Bhiwadi", "Chittaurgarh", "Churu", "Dausa", "Dhaulpur", "Dungarpur", "Ganganagar", "Hanumangarh", "Jaipur", "Jaisalmer", "Jalor", "Jhalawar", "Jhunjhunun", "Jodhpur", "Karauli", "Kodiyat", "Kota", "Nagaur", "Pali", "Pratapgarh", "Rajsamand", "Sawai Madhopur", "Sikar", "Sirohi", "Tonk"],
+  "Telangana": ["Gaddi Annaram", "Hyderabad", "Patancheru", "Quthbullapur", "Sangareddi", "Serilingampalle"],
+  "Tripura": ["Agartala"],
+  "Uttarakhand": ["Birbhaddar", "Clement Town", "Kashipur"],
+  "Himachal Pradesh": ["Baddi"],
+  "Madhya Pradesh": ["Bhopal", "Damoh", "Dewas", "Gwalior", "Indore", "Jabalpur", "Jayant", "Maihar", "Morar", "Murwara", "Pithampur", "Ratlam", "Satna", "Saugor", "Ujjain"],
+  "Tamil Nadu": ["Arimalam", "Ariyalur", "Ayyalur", "Chennai", "Coimbatore", "Dindigul", "Karambakkudi", "Karur", "Madurai", "Ooty", "Pappankuppam", "Puliyur", "Ramanathapuram", "Ranipet", "Sivakasi", "Sooriyur", "Tiruchirappalli", "Tirunelveli", "Tiruppur", "Vandalur", "Virudunagar"],
+  "Uttar Pradesh": ["Agra", "Baghpat", "Bareilly", "Bulandshahr", "Dadri", "Firozabad", "Ghaziabad", "Greater Noida", "Hapur", "Jhansi", "Kanpur", "Khurja", "Loni", "Lucknow", "Meerut", "Moradabad", "Muzaffarnagar", "Noida", "Prayagraj", "Rohta", "Sunrakh Bangar", "Varanasi"],
+  "West Bengal": ["Asansol", "Barakpur", "Durgapur", "Haldia", "Howrah", "Kolkata", "Raniganj", "Siliguri"]
+};
+
+    const options = cities[state] || [];
+    options.forEach(city => {
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        citySelect.appendChild(option);
+    });
+};
+
+// Load user preferences from Firebase
+async function loadUserPreferences(userId) {
+    try {
+        const preferencesRef = ref(db, 'users/' + userId + '/preferences');
+        const snapshot = await get(preferencesRef);
+        const cityList = document.getElementById('cityList');
+        const emptyMessage = document.getElementById('emptyMessage');
+        
+        if (snapshot.exists()) {
+            const preferences = snapshot.val();
+            emptyMessage.style.display = 'none';
+            for (const key in preferences) {
+                const preference = preferences[key];
+                const li = document.createElement('li');
+                li.className = 'cityList-item';
+                li.textContent = `State: ${preference.state}, City: ${preference.city}`;
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = async function () {
+                    const prefRef = ref(db, 'users/' + userId + '/preferences/' + key);
+                    await remove(prefRef);
+                    cityList.removeChild(li);
+                    if (cityList.children.length === 0) {
+                        emptyMessage.style.display = 'block';
+                    }
+                };
+
+                li.appendChild(deleteButton);
+                cityList.appendChild(li);
+            }
+        } else {
+            emptyMessage.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error loading user preferences:', error.message);
+    }
+}
+
+// Handle the notification form submission
+// Existing submitNotificationForm function, updated to call sendPreferencesEmail
+async function submitNotificationForm() {
+    const state = document.getElementById('state').value;
+    const city = document.getElementById('city').value;
+    // Ensure all fields are filled out
+    if (!state || !city) {
+        alert('All fields are required.');
+        return;
+    }
+    console.log('State:', state, 'City:', city);
+
+    const user = auth.currentUser;
+    if (!user) {
+        alert('You must be logged in to submit preferences.');
+        return;
+    }
+
+    const userId = user.uid;
+    const preferencesRef = ref(db, 'users/' + userId + '/preferences');
+    const newPreferenceRef = push(preferencesRef);
+    await set(newPreferenceRef, {
+        state,
+        city,
+    });
+
+    // Add the preference item to the list on the page
+    const preferenceItem = document.createElement('li');
+    preferenceItem.className = 'cityList-item';
+    preferenceItem.textContent = `State: ${state}, City: ${city}`;
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.onclick = async function () {
+        await remove(newPreferenceRef);
+        cityList.removeChild(preferenceItem);
+    };
+
+    preferenceItem.appendChild(deleteButton);
+    document.getElementById('cityList').appendChild(preferenceItem);
+
+    // Send preferences via email
+    try {
+        const payload = {
+            email: user.email,
+            preferences: [{ state, city }]
+        };
+
+        const response = await fetch('/send_preferences_email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+
+        const text = await response.text();
+        console.log('Response status:', response.status);
+        console.log('Response text:', text);
+
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+            alert('An error occurred while processing your request.');
+            return;
+        }
+
+        if (result.success) {
+            alert('Preferences email sent successfully');
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error sending email:', error);
+        alert('An error occurred while sending the email');
+    }
+}
+
+// Toggle the notification form visibility
+document.getElementById('notifications-btn').addEventListener('click', function () {
+    const notificationForm = document.getElementById('notificationForm');
+    notificationForm.style.display = notificationForm.style.display === 'none' ? 'block' : 'none';
+});
+
+// Event listener for form submission
+document.getElementById('submit-btn').addEventListener('click', submitNotificationForm);
+
+</script>
+{% endblock %}

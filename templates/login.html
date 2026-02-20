@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pavan.ai - Login</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="form-container">
+        <h2>Login</h2>
+        <button id="google-login-btn" class="btn google-btn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+            Sign in with Google
+        </button>
+        <div class="divider"><span>or</span></div>
+        <form id="login-form" onsubmit="handleLoginSubmit(event)">
+            <div class="input-group">
+                <input type="email" id="email" name="email" placeholder="Email" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn submit-btn">Login</button>
+        </form>
+        <div class="form-toggle">
+            <span>Don't have an account? </span><a href="/register">Sign Up</a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyChZnOB48l2koPn5mPSqFqChoBv3ZhwKTw",
+            authDomain: "pavanai-53e34.firebaseapp.com",
+            databaseURL: "https://pavanai-53e34-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "pavanai-53e34",
+            storageBucket: "pavanai-53e34.firebasestorage.app",
+            messagingSenderId: "169392243813",
+            appId: "1:169392243813:web:6671bb6d6e9b2d150b328c",
+            measurementId: "G-WQ28J3R0VF"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app)
+        
+        // Google Login Handler
+        document.getElementById('google-login-btn').addEventListener('click', async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                const idToken = await user.getIdToken();
+                
+                // Send ID token to the server for validation
+                const response = await fetch('/google-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idToken })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Google login failed on the server.');
+                }
+                
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = '/'; // Redirect to home on successful login
+                } else {
+                    alert(data.message || "Google login failed.");
+                }
+            } catch (error) {
+                console.error("Google Login Error:", error.message);
+                alert("Google login failed. Please try again.");
+            }
+        });
+        
+        // Email/Password Login Handler
+        window.handleLoginSubmit = async (event) => {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!email || !password) {
+                alert("Please enter both email and password.");
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            if (!emailRegex.test(email)) {
+                alert("Please enter a valid email address.");
+                return;
+            }
+            
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Get the ID token after successful login
+                const idToken = await user.getIdToken();
+                
+                // Send ID token to the server for validation
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idToken }),
+                });
+                
+                if (!response.ok) {
+                    throw new Error("Server error: " + response.statusText);
+                }
+                
+                const data = await response.json();
+                if (data.success) {
+                    window.location.href = '/'; // Redirect to home or user dashboard
+                } else {
+                    alert(data.message || "Login failed.");
+                }
+            } catch (error) {
+                console.error("Login Error:", error);
+                switch (error.code) {
+                    case 'auth/wrong-password':
+                        alert("Incorrect password. Please try again.");
+                        break;
+                    case 'auth/user-not-found':
+                        alert("User not found. Please check the email address.");
+                        break;
+                    case 'auth/too-many-requests':
+                        alert("Too many requests. Please try again later.");
+                        break;
+                    default:
+                        alert("An error occurred. Please try again.");
+                }
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLoginSubmit);
+            } else {
+                console.error("Login form not found!");
+            }
+        });
+    </script>
+</body>
+</html>

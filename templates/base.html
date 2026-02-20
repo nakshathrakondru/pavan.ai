@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pavan.ai</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+      nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(15, 23, 42, 0.9);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: #2dd4bf;
+            text-decoration: underline;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}" id="homeLink">Home</a>
+            {% if not session.get('user_email') %}
+                <a href="{{ url_for('login_page') }}" id="loginLink">Login</a>
+                <a href="{{ url_for('registration_page') }}" id="registerLink">Register</a>
+            {% else %}
+                <a href="{{ url_for('profile') }}" id="profileLink">Profile</a>
+                <a href="{{ url_for('logout') }}" id="logoutLink">Logout</a>
+            {% endif %}
+            <a href="{{ url_for('about_page') }}" id="AboutLink">About Us</a>
+        </div>
+    </nav>
+    {% block content %}{% endblock %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const userEmail = "{{ session.get('user_email') }}";
+            console.log('User Email after reload:', userEmail);
+        });
+    </script>
+</body>
+</html>
